@@ -24,6 +24,81 @@
       gap: 20px;
     }
 
+    /* ── Main Header ── */
+    .main-header {
+      width: 100%;
+      max-width: 800px;
+      background-color: #74c0fc;
+      border-radius: 20px;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .header-titles {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      overflow: hidden;
+      padding-right: 20px;
+    }
+
+    .main-header h1 {
+      background: linear-gradient(90deg, #ff6b6b, #fcc419, #51cf66, #339af0, #cc5de8, #ff6b6b);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      color: transparent;
+      font-size: 28px;
+      margin: 0;
+      filter: drop-shadow(2px 3px 2px rgba(0,0,0,0.15));
+      position: relative;
+      z-index: 2;
+      font-weight: bold;
+      animation: gradientFlow 4s linear infinite;
+    }
+
+    @keyframes gradientFlow {
+      0% {
+        background-position: 0% center;
+      }
+      100% {
+        background-position: -200% center;
+      }
+    }
+
+    .author-banner {
+      font-size: 13px;
+      font-weight: bold;
+      color: #0b2240;
+      background-color: rgba(255, 255, 255, 0.85);
+      padding: 3px 12px;
+      border-radius: 12px;
+      margin-top: 6px;
+      display: inline-block;
+      animation: slideInBanner 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      opacity: 0;
+      transform: translateX(100%);
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 1;
+    }
+
+    @keyframes slideInBanner {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .main-header img {
+      height: 50px;
+      object-fit: contain;
+    }
+
     /* ── Barra de progreso ── */
     .progress-bar-wrap {
       width: 100%;
@@ -58,14 +133,47 @@
 
     .slide {
       display: none;
-      background: white;
+      position: relative;
+      background: transparent;
       border-radius: 30px;
       box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
       width: 100%;
       padding: 36px;
       text-align: center;
-      border: 6px solid #74c0fc;
+      border: 6px solid transparent;
       animation: fadeIn 0.35s ease;
+      overflow: hidden;
+      z-index: 1;
+    }
+
+    .slide::before {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: conic-gradient(from 0deg, #74c0fc, #ffffff, #74c0fc, #ffffff, #74c0fc);
+      animation: spinBorder 4s linear infinite;
+      z-index: -2;
+    }
+
+    .slide::after {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: white;
+      z-index: -1;
+      border-radius: 24px;
+    }
+
+    @keyframes spinBorder {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     .slide.active {
@@ -346,6 +454,15 @@
 </head>
 
 <body>
+
+  <!-- Header con Logo y Título -->
+  <header class="main-header">
+    <div class="header-titles">
+      <h1>Ordenar Rutinas de Aseo</h1>
+      <div class="author-banner">Por: Yarley Delgado</div>
+    </div>
+    <img src="https://sp-ao.shortpixel.ai/client/to_webp,q_glossy,ret_img,w_640,h_281/https://unincca.edu.co/wp-content/uploads/2024/06/LOGO-70-ANOS-blanco-1024x449.png" alt="Logo Universidad">
+  </header>
 
   <!-- Progreso -->
   <div class="progress-bar-wrap">
@@ -646,23 +763,40 @@
       });
     }
 
-    function playStarSound() {
+    function playStarSound(index = 0) {
       if (audioCtx.state === 'suspended') audioCtx.resume();
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
 
       osc.type = 'sine'; // Tono suave
-      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+      
+      // Ajustar frecuencias para simular ding (agudo), dong (medio), dang (grave)
+      let startFreq, endFreq;
+      if (index === 0) {
+        startFreq = 1200; endFreq = 1600; // Ding
+      } else if (index === 1) {
+        startFreq = 800; endFreq = 1000;  // Dong
+      } else {
+        startFreq = 400; endFreq = 600;   // Dang
+      }
 
-      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+      osc.frequency.setValueAtTime(startFreq, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(endFreq, audioCtx.currentTime + 0.15);
+
+      gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
 
       osc.connect(gainNode);
       gainNode.connect(audioCtx.destination);
       osc.start();
-      osc.stop(audioCtx.currentTime + 0.1);
+      osc.stop(audioCtx.currentTime + 0.3);
     }
+
+    document.addEventListener('click', () => {
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }, { once: true });
 
     document.querySelectorAll('.footer-stars').forEach(container => {
       // Envolver las estrellas de texto en <span> interactivos
@@ -673,10 +807,12 @@
         }).join('');
       }
 
-      container.addEventListener('click', e => {
-        if (e.target.classList.contains('star-icon')) {
-          playStarSound();
-        }
+      container.querySelectorAll('.star-icon').forEach((star, index) => {
+        const playSound = () => {
+          playStarSound(index);
+        };
+        star.addEventListener('mouseenter', playSound);
+        star.addEventListener('click', playSound);
       });
     });
 
@@ -801,9 +937,19 @@
               // Si es incorrecta y deshabilitada y ya no queremos que suene, podríamos retornar
               // Pero dejaremos que se lea siempre, por accesibilidad.
             }
+
+            // Si es el encabezado y ya se reprodujo, ignorar
+            if (item.selector === '.slide-header' && el.dataset.played === 'true') {
+              return;
+            }
+
             const text = item.getText(el);
             if (text && text.trim() !== '') {
               playChildVoice(text.trim());
+              
+              if (item.selector === '.slide-header') {
+                el.dataset.played = 'true';
+              }
             }
           });
         });
