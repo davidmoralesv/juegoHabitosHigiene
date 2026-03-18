@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Higiene Personal - Preescolar</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', cursive;
+      background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      gap: 20px;
+    }
+
+    /* ── Barra de progreso ── */
+    .progress-bar-wrap {
+      width: 100%;
+      max-width: 800px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 20px;
+      height: 14px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #51cf66, #74c0fc);
+      border-radius: 20px;
+      transition: width 0.4s ease;
+    }
+
+    /* ── Contador ── */
+    .counter {
+      color: #555;
+      font-size: 15px;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+
+    /* ── Slide ── */
+    .slide-wrapper {
+      width: 100%;
+      max-width: 800px;
+      position: relative;
+    }
+
+    .slide {
+      display: none;
+      background: white;
+      border-radius: 30px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+      width: 100%;
+      padding: 36px;
+      text-align: center;
+      border: 6px solid #74c0fc;
+      animation: fadeIn 0.35s ease;
+    }
+
+    .slide.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ── Header ── */
+    .slide-header {
+      border-radius: 20px;
+      padding: 20px 28px;
+      margin-bottom: 26px;
+    }
+
+    .slide-icon {
+      font-size: 68px;
+      display: block;
+      margin-bottom: 8px;
+      filter: drop-shadow(2px 4px 6px rgba(0, 0, 0, 0.2));
+    }
+
+    .slide-label {
+      color: white;
+      font-size: 14px;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      opacity: 0.9;
+      margin-bottom: 6px;
+    }
+
+    .question {
+      color: white;
+      font-size: 26px;
+      font-weight: bold;
+      line-height: 1.35;
+      text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ── Opciones ── */
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 22px;
+      border-radius: 18px;
+      font-size: 19px;
+      font-weight: bold;
+      border: 3px solid transparent;
+      text-align: left;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .option:hover {
+      transform: scale(1.015);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+    }
+
+    .option-letter {
+      font-size: 22px;
+      min-width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .option-text {
+      flex: 1;
+      color: #333;
+    }
+
+    /* Estado neutro (inicial) */
+    .option {
+      background: #f1f3f5;
+      border-color: #ced4da;
+      cursor: pointer;
+      border: 3px solid #ced4da;
+    }
+
+    .option .option-letter {
+      background: #adb5bd;
+    }
+
+    /* Correcto */
+    .option.correct {
+      background: #d3f9d8;
+      border-color: #51cf66;
+    }
+
+    .option.correct .option-letter {
+      background: #51cf66;
+      color: white;
+    }
+
+    /* Incorrecto */
+    .option.wrong {
+      background: #ffe3e3;
+      border-color: #ff8787;
+    }
+
+    .option.wrong .option-letter {
+      background: #ff8787;
+      color: white;
+    }
+
+    /* Deshabilitado tras responder */
+    .option.disabled {
+      cursor: default;
+    }
+
+    .option.disabled:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
+    .correct-badge {
+      background: #51cf66;
+      color: white;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 15px;
+      margin-left: auto;
+      white-space: nowrap;
+      display: none;
+    }
+
+    .option.correct .correct-badge {
+      display: block;
+    }
+
+    .footer-stars {
+      margin-top: 24px;
+      font-size: 26px;
+      letter-spacing: 6px;
+    }
+
+    .footer-stars .star-icon {
+      cursor: pointer;
+      display: inline-block;
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .footer-stars .star-icon:hover {
+      transform: scale(1.3) rotate(15deg);
+    }
+
+    .footer-stars .star-icon:active {
+      transform: scale(0.8);
+    }
+
+    /* ── Navegación ── */
+    .nav {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    @keyframes pulse-next {
+      0% {
+        transform: scale(1);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 4px 20px rgba(81, 207, 102, 0.6);
+        background-color: #51cf66;
+        color: white;
+        border-color: #51cf66;
+      }
+
+      100% {
+        transform: scale(1);
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .nav-btn {
+      background: white;
+      border: 3px solid #74c0fc;
+      color: #4dabf7;
+      font-family: inherit;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 12px 28px;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.15s, border-color 0.2s;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-btn.animate-ready {
+      animation: pulse-next 1.5s infinite;
+      border-color: #51cf66;
+      color: #51cf66;
+    }
+
+    .nav-btn:hover,
+    .nav-btn.animate-ready:hover {
+      background: #74c0fc;
+      border-color: #74c0fc;
+      color: white;
+      transform: scale(1.05);
+      animation: none;
+      /* Desactivar pulso al hacer hover para no interferir con el clic */
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+      transform: none;
+      animation: none;
+    }
+
+    /* ── Colores de header por diapositiva ── */
+    .h-blue {
+      background: linear-gradient(135deg, #4dabf7, #74c0fc);
+    }
+
+    .h-pink {
+      background: linear-gradient(135deg, #f783ac, #faa2c1);
+    }
+
+    .h-teal {
+      background: linear-gradient(135deg, #20c997, #63e6be);
+    }
+
+    .h-purple {
+      background: linear-gradient(135deg, #9775fa, #b197fc);
+    }
+
+    .h-orange {
+      background: linear-gradient(135deg, #ff922b, #ffa94d);
+    }
+
+    .h-green {
+      background: linear-gradient(135deg, #51cf66, #8ce99a);
+    }
+
+    .h-red {
+      background: linear-gradient(135deg, #ff6b6b, #ffa8a8);
+    }
+
+    .h-indigo {
+      background: linear-gradient(135deg, #5c7cfa, #91a7ff);
+    }
+
+    .h-lime {
+      background: linear-gradient(135deg, #94d82d, #c0eb75);
+    }
+
+    .h-cyan {
+      background: linear-gradient(135deg, #22b8cf, #66d9e8);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Progreso -->
+  <div class="progress-bar-wrap">
+    <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
+  </div>
+  <div class="counter" id="counter">1 / 10</div>
+
+  <!-- Diapositivas -->
+  <div class="slide-wrapper">
+
+    <!-- ══ Diapositiva 1 ══ -->
+    <div class="slide active">
+      <div class="slide-header h-blue">
+        <span class="slide-icon">🧼</span>
+        <div class="slide-label">Diapositiva 1 · Higiene Personal</div>
+        <div class="question">¿Cuándo debo lavarme las manos?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Antes de comer y después de ir al baño</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Solo cuando están sucias</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Una vez a la semana</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 2 ══ -->
+    <div class="slide">
+      <div class="slide-header h-pink">
+        <span class="slide-icon">🪥</span>
+        <div class="slide-label">Diapositiva 2 · Higiene Personal</div>
+        <div class="question">¿Cuándo debo cepillarme los dientes?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Después de comer y antes de dormir</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Solo cuando duelen</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Una vez al mes</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 3 ══ -->
+    <div class="slide">
+      <div class="slide-header h-teal">
+        <span class="slide-icon">🛁</span>
+        <div class="slide-label">Diapositiva 3 · Higiene Personal</div>
+        <div class="question">¿Para qué sirve bañarse?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Para limpiar el cuerpo y quitar gérmenes</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Solo para jugar con el agua</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Para no ir a la escuela</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 4 ══ -->
+    <div class="slide">
+      <div class="slide-header h-purple">
+        <span class="slide-icon">🪥</span>
+        <div class="slide-label">Diapositiva 4 · Higiene Personal</div>
+        <div class="question">¿Qué debo usar para cepillarme los dientes?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Cepillo y crema dental</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Solo agua</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Una toalla</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 5 ══ -->
+    <div class="slide">
+      <div class="slide-header h-orange">
+        <span class="slide-icon">🤧</span>
+        <div class="slide-label">Diapositiva 5 · Higiene Personal</div>
+        <div class="question">¿Qué hago si estornudo?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Cubrirme con el codo o pañuelo</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">En las manos</div>
+        </div>
+        <div class="option">
+          <div class="option-text">No cubrirme</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 6 ══ -->
+    <div class="slide">
+      <div class="slide-header h-green">
+        <span class="slide-icon">👕</span>
+        <div class="slide-label">Diapositiva 6 · Higiene Personal</div>
+        <div class="question">¿Cada cuánto cambio la ropa interior?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Todos los días</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Una vez a la semana</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Cuando me acuerde</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 7 ══ -->
+    <div class="slide">
+      <div class="slide-header h-red">
+        <span class="slide-icon">✂️</span>
+        <div class="slide-label">Diapositiva 7 · Higiene Personal</div>
+        <div class="question">¿Por qué debemos cortar las uñas?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Para evitar suciedad y gérmenes</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Para que desaparezcan</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Porque sí</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 8 ══ -->
+    <div class="slide">
+      <div class="slide-header h-indigo">
+        <span class="slide-icon">🍎</span>
+        <div class="slide-label">Diapositiva 8 · Higiene Personal</div>
+        <div class="question">¿Qué debo hacer antes de comer?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Lavarme las manos</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Jugar con tierra</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Comer sin lavar</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 9 ══ -->
+    <div class="slide">
+      <div class="slide-header h-lime">
+        <span class="slide-icon">🧻</span>
+        <div class="slide-label">Diapositiva 9 · Higiene Personal</div>
+        <div class="question">¿Con qué seco mis manos?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Toalla limpia o papel</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Mi ropa</div>
+        </div>
+        <div class="option">
+          <div class="option-text">El suelo</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+    <!-- ══ Diapositiva 10 ══ -->
+    <div class="slide">
+      <div class="slide-header h-cyan">
+        <span class="slide-icon">🦠</span>
+        <div class="slide-label">Diapositiva 10 · Higiene Personal</div>
+        <div class="question">¿Por qué es importante lavarse las manos?</div>
+      </div>
+      <div class="options">
+        <div class="option" data-correct="true">
+          <div class="option-text">Para evitar enfermarnos</div>
+          <div class="correct-badge">✅ Correcto</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Para perder tiempo</div>
+        </div>
+        <div class="option">
+          <div class="option-text">Para mojar el piso</div>
+        </div>
+      </div>
+      <div class="footer-stars">⭐ ⭐ ⭐</div>
+    </div>
+
+  </div><!-- /slide-wrapper -->
+
+  <!-- Navegación -->
+  <div class="nav">
+    <button class="nav-btn" id="btnPrev" onclick="changeSlide(-1)" disabled>◀ Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="changeSlide(1)" disabled>Siguiente ▶</button>
+  </div>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    let current = 0;
+
+    // Registro de diapositivas respondidas correctamente
+    const answered = new Array(total).fill(false);
+
+    function updateNav() {
+      document.getElementById('btnPrev').disabled = current === 0;
+      const btnNext = document.getElementById('btnNext');
+      btnNext.disabled = current === total - 1 || !answered[current];
+
+      // Animación de pulso cuando se habilita el botón Siguiente
+      if (!btnNext.disabled && current !== total - 1) {
+        btnNext.classList.add('animate-ready');
+      } else {
+        btnNext.classList.remove('animate-ready');
+      }
+    }
+
+
+    // Función para mezclar opciones de forma aleatoria en cada diapositiva
+    function shuffleOptions() {
+      document.querySelectorAll('.options').forEach(container => {
+        const opciones = Array.from(container.querySelectorAll('.option'));
+        // Orden aleatorio
+        opciones.sort(() => Math.random() - 0.5);
+        // Volver a añadir las opciones al DOM (lo que cambia el orden visible)
+        opciones.forEach(opt => container.appendChild(opt));
+      });
+    }
+
+    // Configuración de estrellas interactivas con sonido mágico
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playBellSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+
+      // Frecuencias para crear un sonido tipo "ding" armonioso (Campanilla: Do6, Mi6)
+      const frequencies = [1046.50, 1318.51];
+
+      frequencies.forEach((freq, index) => {
+        const osc = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        osc.type = 'sine'; // Tonalidad redonda de campana
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+        // Efecto campanilla (decaimiento rápido del volumen) con pequeñísimo retraso entre ambas notas
+        const startTime = audioCtx.currentTime + (index * 0.08);
+        gainNode.gain.setValueAtTime(0.15, startTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + 0.6);
+
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        osc.start(startTime);
+        osc.stop(startTime + 0.6);
+      });
+    }
+
+    function playStarSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      osc.type = 'sine'; // Tono suave
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1);
+
+      gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1);
+
+      osc.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.1);
+    }
+
+    document.querySelectorAll('.footer-stars').forEach(container => {
+      // Envolver las estrellas de texto en <span> interactivos
+      if (container.textContent.includes('⭐')) {
+        container.innerHTML = container.textContent.split('').map(char => {
+          if (char === '⭐') return '<span class="star-icon">⭐</span>';
+          return char;
+        }).join('');
+      }
+
+      container.addEventListener('click', e => {
+        if (e.target.classList.contains('star-icon')) {
+          playStarSound();
+        }
+      });
+    });
+
+    // Ejecutar inmediatamente
+    shuffleOptions();
+
+    // Manejo de clics en opciones
+    document.querySelectorAll('.option').forEach(opt => {
+      opt.addEventListener('click', function () {
+        const parent = this.closest('.options');
+
+        // Si ya respondió correctamente en esta diapositiva, ignorar
+        if (parent.querySelector('.option.correct')) return;
+
+        // Si ya marcó esta opción como incorrecta, ignorar
+        if (this.classList.contains('wrong')) return;
+
+        if (this.dataset.correct === 'true') {
+          this.classList.add('correct');
+          // Deshabilitar todas las opciones
+          parent.querySelectorAll('.option').forEach(o => o.classList.add('disabled'));
+
+          // Mostrar ¡Felicitaciones! en lugar de las estrellas si es la última pregunta
+          if (current === total - 1) {
+            const stars = this.closest('.slide').querySelector('.footer-stars');
+            if (stars) {
+              stars.textContent = '¡Felicitaciones!';
+            }
+          }
+
+          // Habilitar botón Siguiente y reproducir campanita
+          answered[current] = true;
+          updateNav();
+
+          if (current !== total - 1) {
+            playBellSound(); // Reproducir sólo si hay una "Siguiente" diapositiva
+          }
+
+          setTimeout(() => {
+            document.getElementById('btnNext').scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 300);
+        } else {
+          this.classList.add('wrong');
+          this.classList.add('disabled');
+        }
+      });
+    });
+
+    function changeSlide(dir) {
+      if (dir === 1 && !answered[current]) return; // bloquear avance sin respuesta
+      slides[current].classList.remove('active');
+      current = Math.min(Math.max(current + dir, 0), total - 1);
+      slides[current].classList.add('active');
+      document.getElementById('counter').textContent = (current + 1) + ' / ' + total;
+      document.getElementById('progressFill').style.width = ((current + 1) / total * 100) + '%';
+      updateNav();
+    }
+
+    // Navegación con teclado
+    document.addEventListener('keydown', e => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') changeSlide(1);
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') changeSlide(-1);
+    });
+
+    // --- Text to Speech (Voz de niño) ---
+    function playChildVoice(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(text);
+        // Ajustes para simular voz infantil: tono alto temporal
+        utterance.lang = 'es-LA'; // Español latinoamericano (prioridad si está disponible)
+        utterance.pitch = 1.7; // Tono más agudo para simular niño
+        utterance.rate = 0.9;  // Velocidad amigable para niños
+
+        // Tratar de asignar una voz en español
+        const voces = window.speechSynthesis.getVoices();
+        const vozEsp = voces.find(v => v.lang.startsWith('es'));
+        if (vozEsp) {
+          utterance.voice = vozEsp;
+        }
+
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    // Inicializar voces para evitar que se carguen tarde en algunos navegadores
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.onvoiceschanged = () => { window.speechSynthesis.getVoices(); };
+    }
+
+    function setupAudioHover() {
+      const speakElements = [
+        {
+          selector: '.slide-header',
+          getText: el => {
+            const labelEl = el.querySelector('.slide-label');
+            const questionEl = el.querySelector('.question');
+            // Reemplazamos el punto central por un punto ortográfico para que haga pausa
+            const labelText = labelEl ? labelEl.innerText.replace('·', '.') : '';
+            const questionText = questionEl ? questionEl.innerText : '';
+
+            // Para asegurar que haga énfasis en que es una pregunta, añadimos una pequeña pausa (...)
+            // y una frase introductoria de advertencia de pregunta, muy útil para niños.
+            return `${labelText}... y la pregunta es... ${questionText}`;
+          }
+        },
+        {
+          selector: '.option', getText: el => {
+            const t = el.querySelector('.option-text');
+            return t ? t.innerText : '';
+          }
+        },
+        { selector: '.nav-btn', getText: el => el.innerText.replace('◀', '').replace('▶', '') }
+      ];
+
+      speakElements.forEach(item => {
+        document.querySelectorAll(item.selector).forEach(el => {
+          el.addEventListener('mouseenter', () => {
+            if (el.disabled) return; // Evitar sonido en botones deshabilitados
+            // Evitar reproducir nuevamente sobre opciones deshabilitadas por ser incorrectas
+            if (el.classList && el.classList.contains('disabled') && !el.classList.contains('correct')) {
+              // Si es incorrecta y deshabilitada y ya no queremos que suene, podríamos retornar
+              // Pero dejaremos que se lea siempre, por accesibilidad.
+            }
+            const text = item.getText(el);
+            if (text && text.trim() !== '') {
+              playChildVoice(text.trim());
+            }
+          });
+        });
+      });
+    }
+
+    setupAudioHover();
+  </script>
+</body>
+
+</html>
